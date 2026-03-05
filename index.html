@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Icône fixe (inchangée) -->
   <link rel="icon" type="image/jpeg" href="icone_site.jpeg">
   <link rel="apple-touch-icon" sizes="180x180" href="icone_site.jpeg">
   
-  <title>Compte à rebours • intelligent</title>
+  <title>Compte à rebours • API interactive</title>
   
   <style>
-    /* ----- STYLE MODERNE (inspiré de la version précédente) ----- */
+    /* (Gardez le même style que la version précédente) */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -30,7 +29,6 @@
       color: #eef2f5;
     }
 
-    /* Grille animée plus douce et profonde */
     body::before {
       content: "";
       position: fixed;
@@ -49,7 +47,6 @@
       100% { transform: translate(-70px, -70px); }
     }
 
-    /* Carte principale */
     .glass-card {
       position: relative;
       z-index: 10;
@@ -89,7 +86,6 @@
       backdrop-filter: blur(4px);
     }
 
-    /* Grille de boutons */
     .button-grid {
       display: flex;
       flex-direction: column;
@@ -152,7 +148,6 @@
       border: 1px solid rgba(255,255,255,0.25);
     }
 
-    /* Zone API (titre + image) */
     .api-info {
       margin: 1.5rem 0 0.2rem;
       text-align: center;
@@ -178,7 +173,6 @@
       transition: opacity 0.2s;
     }
 
-    /* Popup moderne */
     .popup-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -246,7 +240,6 @@
       transform: scale(0.97);
     }
 
-    /* Responsive */
     @media (max-width: 480px) {
       .glass-card { padding: 1.5rem; border-radius: 2rem; }
       .time-remaining { font-size: 3.2rem; }
@@ -280,7 +273,6 @@
     </div>
   </div>
 
-  <!-- Popup pour saisir l'heure -->
   <div class="popup-overlay" id="timePickerPopup">
     <div class="popup-card">
       <input type="time" id="timeInput" value="18:00">
@@ -294,17 +286,15 @@
 
       // -------------------- ÉTAT GLOBAL --------------------
       let countdownInterval = null;
-      let targetDate = null;           // Date cible actuelle
-      let usingAPI = false;             // Mode actif
-      let apiData = null;               // Stocke { name, image } du dernier appel API
+      let targetDate = null;
+      let usingAPI = false;
+      let apiData = null;
 
-      // Clés localStorage
       const LS_MANUAL = 'targetDateManual';
       const LS_API = 'targetDateAPI';
       const LS_APIURL = 'apiUrl';
-      const LS_APIDATA = 'apiData';     // pour sauvegarder name/image
+      const LS_APIDATA = 'apiData';
 
-      // Éléments DOM
       const elTime = document.getElementById('timeRemaining');
       const elTarget = document.getElementById('targetTime');
       const elApiTitle = document.getElementById('apiTitle');
@@ -330,7 +320,6 @@
           elTime.textContent = '00:00:00';
           clearInterval(countdownInterval);
           countdownInterval = null;
-          // Ne pas supprimer targetDate, juste arrêter le compteur
           return;
         }
 
@@ -341,7 +330,6 @@
         elTime.textContent = `${formatTwoDigits(hours)}:${formatTwoDigits(minutes)}:${formatTwoDigits(seconds)}`;
       }
 
-      // Met à jour la ligne cible et les infos API (titre/image)
       function updateTargetDisplay() {
         if (!targetDate) {
           elTarget.textContent = 'CIBLE : --:--';
@@ -351,12 +339,10 @@
           return;
         }
 
-        // Format lisible : jour/mois/année heures:minutes
         const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
         const localStr = targetDate.toLocaleString('fr-FR', options).replace(':', 'h');
         elTarget.textContent = `CIBLE : ${localStr}`;
 
-        // Métadonnées API
         if (usingAPI && apiData) {
           elApiTitle.textContent = apiData.name || '';
           if (apiData.image) {
@@ -373,7 +359,6 @@
         }
       }
 
-      // Nettoie l'intervalle
       function clearSafeInterval() {
         if (countdownInterval) {
           clearInterval(countdownInterval);
@@ -381,11 +366,10 @@
         }
       }
 
-      // Lance le compte à rebours (si targetDate valide)
       function safeStartCountdown() {
         if (!targetDate) return false;
         clearSafeInterval();
-        updateDisplay(); // affichage immédiat
+        updateDisplay();
         countdownInterval = setInterval(updateDisplay, 1000);
         return true;
       }
@@ -409,7 +393,6 @@
         let candidate = new Date(now);
         candidate.setHours(hours, minutes, 0, 0);
 
-        // Si l'heure est déjà passée aujourd'hui, on prend demain
         if (candidate <= now) {
           candidate.setDate(candidate.getDate() + 1);
         }
@@ -418,8 +401,7 @@
         usingAPI = false;
         apiData = null;
 
-        // Sauvegarde
-        localStorage.setItem(LS_MANUAL, targetDate.toString());
+        localStorage.setItem(LS_MANUAL, targetDate.toISOString());
         localStorage.removeItem(LS_API);
         localStorage.removeItem(LS_APIDATA);
 
@@ -463,7 +445,6 @@
         const apiDataRaw = localStorage.getItem(LS_APIDATA);
 
         if (usingAPI) {
-          // Actuellement API → basculer vers manuel si disponible
           if (manualRaw) {
             targetDate = new Date(manualRaw);
             usingAPI = false;
@@ -474,7 +455,6 @@
             return;
           }
         } else {
-          // Mode manuel → basculer vers API si disponible
           if (apiRaw) {
             targetDate = new Date(apiRaw);
             usingAPI = true;
@@ -493,7 +473,7 @@
         safeStartCountdown();
       };
 
-      // -------------------- CHARGEMENT API (ULTRA COMPATIBLE) --------------------
+      // -------------------- CHARGEMENT API AVEC CHOIX POSSIBLE --------------------
       window.loadAPI = async function() {
         const url = prompt('Entrez l’URL de l’API (JSON contenant une date) :', '');
         if (!url) return;
@@ -502,7 +482,7 @@
           let response;
           let useProxy = false;
 
-          // Tentative de fetch direct
+          // Tentative directe
           try {
             response = await fetch(url);
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -512,7 +492,6 @@
 
           let data;
           if (useProxy) {
-            // Fallback CORS via allorigins
             const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
             const proxyRes = await fetch(proxyUrl);
             const proxyJson = await proxyRes.json();
@@ -521,34 +500,49 @@
             data = await response.json();
           }
 
-          // Fonction récursive pour extraire toutes les dates potentielles (chaînes convertibles)
+          // Fonction récursive pour extraire toutes les dates possibles
           let foundDates = [];
 
           function extractDates(obj) {
-            if (!obj || typeof obj !== 'object') return;
-            for (let key in obj) {
-              let val = obj[key];
-              // Si la valeur est une chaîne, on tente de la convertir en Date
-              if (typeof val === 'string') {
-                let d = new Date(val);
-                if (!isNaN(d)) foundDates.push(d);
-              }
-              // Si la clé elle-même ressemble à une date (peu probable mais au cas où)
-              if (typeof key === 'string') {
-                let dk = new Date(key);
-                if (!isNaN(dk)) foundDates.push(dk);
-              }
-              // Récursion dans les objets ou tableaux
-              if (val && typeof val === 'object') {
-                extractDates(val);
+            if (obj === null || obj === undefined) return;
+            if (typeof obj === 'object') {
+              if (Array.isArray(obj)) {
+                for (let item of obj) {
+                  extractDates(item);
+                }
+              } else {
+                for (let key in obj) {
+                  let val = obj[key];
+                  // Tester la valeur
+                  if (typeof val === 'string') {
+                    let d = new Date(val);
+                    if (!isNaN(d)) foundDates.push(d);
+                  } else if (typeof val === 'number') {
+                    // Gestion des timestamps (secondes ou millisecondes)
+                    let timestamp = val;
+                    if (timestamp > 1e9 && timestamp < 1e10) { // secondes
+                      timestamp *= 1000;
+                    }
+                    let d = new Date(timestamp);
+                    if (!isNaN(d)) foundDates.push(d);
+                  } else if (typeof val === 'object') {
+                    extractDates(val);
+                  }
+                  // Tester la clé (parfois la clé peut être une date)
+                  if (typeof key === 'string') {
+                    let dk = new Date(key);
+                    if (!isNaN(dk)) foundDates.push(dk);
+                  }
+                }
               }
             }
           }
 
           extractDates(data);
 
+          // Si aucune date trouvée
           if (foundDates.length === 0) {
-            alert('Aucune date valide trouvée dans la réponse.');
+            alert('Aucune date valide trouvée. Voici un extrait de la réponse :\n' + JSON.stringify(data).slice(0, 300) + '...');
             return;
           }
 
@@ -556,24 +550,49 @@
           const now = new Date();
           let futureDates = foundDates.filter(d => d > now);
           if (futureDates.length === 0) {
-            alert('Toutes les dates trouvées sont déjà passées.');
+            alert('Toutes les dates trouvées sont passées. (Exemple de date trouvée : ' + foundDates[0].toLocaleString() + ')');
             return;
           }
 
-          // Prendre la date future la plus proche
-          futureDates.sort((a, b) => a - b);
-          targetDate = futureDates[0];
+          // Supprimer les doublons (au cas où)
+          futureDates = futureDates.filter((d, i, self) => self.findIndex(d2 => d2.getTime() === d.getTime()) === i);
 
+          // Trier par ordre croissant
+          futureDates.sort((a, b) => a - b);
+
+          let selectedDate;
+
+          if (futureDates.length === 1) {
+            selectedDate = futureDates[0];
+            alert('Une seule date future trouvée : ' + selectedDate.toLocaleString('fr-FR'));
+          } else {
+            // Proposer à l'utilisateur de choisir
+            let message = 'Plusieurs dates futures trouvées :\n';
+            futureDates.forEach((d, index) => {
+              message += (index + 1) + ' - ' + d.toLocaleString('fr-FR') + '\n';
+            });
+            message += 'Entrez le numéro de la date désirée (1-' + futureDates.length + ') :';
+            let choice = prompt(message);
+            if (choice === null) return; // Annulation
+            let index = parseInt(choice) - 1;
+            if (isNaN(index) || index < 0 || index >= futureDates.length) {
+              alert('Choix invalide. Aucune date sélectionnée.');
+              return;
+            }
+            selectedDate = futureDates[index];
+          }
+
+          targetDate = selectedDate;
           usingAPI = true;
 
-          // Extraire les métadonnées (name, image) si présentes
+          // Extraire les métadonnées si présentes (name, image)
           apiData = {
             name: data.name || null,
             image: data.image || null
           };
 
-          // Sauvegarde
-          localStorage.setItem(LS_API, targetDate.toString());
+          // Stockage
+          localStorage.setItem(LS_API, targetDate.toISOString());
           localStorage.setItem(LS_APIURL, url);
           localStorage.setItem(LS_APIDATA, JSON.stringify(apiData));
 
@@ -586,7 +605,7 @@
         }
       };
 
-      // -------------------- INITIALISATION AU CHARGEMENT --------------------
+      // -------------------- INITIALISATION --------------------
       window.addEventListener('load', function() {
         const manual = localStorage.getItem(LS_MANUAL);
         const api = localStorage.getItem(LS_API);
@@ -618,7 +637,6 @@
           elTarget.textContent = 'CIBLE : --:--';
         }
 
-        // Fermer le popup en cliquant sur l'overlay
         popup.addEventListener('click', function(e) {
           if (e.target === popup) hideTimePicker();
         });
