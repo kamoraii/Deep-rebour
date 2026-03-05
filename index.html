@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- Icône fixe (inchangée) -->
   <link rel="icon" type="image/jpeg" href="icone_site.jpeg">
   <link rel="apple-touch-icon" sizes="180x180" href="icone_site.jpeg">
   
-  <title>Compte à rebours • interactif</title>
+  <title>Compte à rebours • intelligent</title>
+  
   <style>
-    /* (le style reste exactement le même que précédemment, 
-       je le réintègre pour que le fichier soit complet) */
+    /* ----- STYLE MODERNE (inspiré de la version précédente) ----- */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -19,8 +20,8 @@
 
     body {
       min-height: 100vh;
-      background: #0b0d10;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0c0f;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -29,74 +30,76 @@
       color: #eef2f5;
     }
 
+    /* Grille animée plus douce et profonde */
     body::before {
       content: "";
       position: fixed;
-      inset: -50% -50% -50% -50%;
+      inset: -100% -100% -100% -100%;
       background-image: 
-        linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      animation: drift 18s linear infinite;
+        linear-gradient(90deg, rgba(140, 210, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(140, 210, 255, 0.02) 1px, transparent 1px);
+      background-size: 70px 70px;
+      animation: drift 24s linear infinite;
       pointer-events: none;
       z-index: 0;
     }
 
     @keyframes drift {
       0% { transform: translate(0, 0); }
-      100% { transform: translate(-60px, -60px); }
+      100% { transform: translate(-70px, -70px); }
     }
 
+    /* Carte principale */
     .glass-card {
       position: relative;
       z-index: 10;
       width: 92%;
       max-width: 500px;
-      background: rgba(18, 22, 28, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(220, 240, 255, 0.08);
-      border-radius: 2.5rem;
-      padding: 2rem 1.8rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(90, 160, 255, 0.1) inset;
-      transition: transform 0.2s ease;
+      background: rgba(18, 24, 32, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(220, 240, 255, 0.1);
+      border-radius: 2.8rem;
+      padding: 2.2rem 1.8rem;
+      box-shadow: 0 30px 60px -15px #000000, 0 0 0 1px rgba(70, 160, 255, 0.15) inset;
     }
 
     .time-remaining {
-      font-size: 4.2rem;
+      font-size: 4rem;
       font-weight: 600;
       letter-spacing: 0.1em;
       text-align: center;
       color: #ffffff;
-      text-shadow: 0 0 20px rgba(60, 160, 255, 0.4);
+      text-shadow: 0 0 25px #2f80ff;
       line-height: 1.2;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-variant-numeric: tabular-nums;
     }
 
     .target-time {
       font-size: 1.2rem;
       text-align: center;
-      color: #9ab3cf;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.4rem 1rem;
-      border-radius: 40px;
+      color: #aac3d9;
+      background: rgba(20, 30, 45, 0.6);
+      padding: 0.5rem 1.2rem;
+      border-radius: 60px;
       display: inline-block;
-      margin: 0 auto 1.2rem;
+      margin: 0 auto 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
       backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.05);
     }
 
+    /* Grille de boutons */
     .button-grid {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      margin: 1.5rem 0 0.5rem;
+      gap: 0.8rem;
+      margin: 1.2rem 0 0.5rem;
     }
 
     .button-row {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.8rem;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -109,34 +112,36 @@
       border-radius: 60px;
       font-weight: 600;
       font-size: 0.95rem;
-      letter-spacing: 0.3px;
       background: rgba(30, 40, 55, 0.8);
-      color: #e0edff;
+      color: #e6f0ff;
       cursor: pointer;
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.15s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: 0.15s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .btn:hover {
-      background: rgba(45, 60, 80, 0.9);
-      border-color: rgba(100, 180, 255, 0.3);
-      transform: scale(0.98);
-      box-shadow: 0 8px 18px rgba(0, 120, 255, 0.2);
+      background: rgba(45, 60, 85, 0.9);
+      border-color: rgba(100, 180, 255, 0.4);
+      transform: scale(0.97);
+      box-shadow: 0 10px 20px rgba(0, 100, 255, 0.3);
     }
 
     .btn-primary {
-      background: rgba(30, 110, 220, 0.85);
+      background: rgba(30, 110, 240, 0.9);
       color: white;
-      border-color: rgba(255, 255, 255, 0.15);
     }
     .btn-primary:hover {
       background: rgb(40, 130, 255);
     }
 
     .btn-success {
-      background: rgba(20, 130, 80, 0.85);
+      background: rgba(20, 130, 80, 0.9);
     }
     .btn-success:hover {
       background: rgb(30, 160, 100);
@@ -144,40 +149,41 @@
 
     .btn-outline {
       background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
     }
 
+    /* Zone API (titre + image) */
     .api-info {
       margin: 1.5rem 0 0.2rem;
       text-align: center;
-      border-top: 1px dashed rgba(255,255,255,0.1);
-      padding-top: 1.2rem;
+      border-top: 1px dashed rgba(255,255,255,0.15);
+      padding-top: 1.4rem;
     }
 
     .api-title {
       font-size: 1.3rem;
       font-weight: 500;
-      color: #cfddee;
-      margin-bottom: 0.75rem;
+      color: #d0e2ff;
+      margin-bottom: 0.8rem;
     }
 
     .api-image {
       max-width: 100%;
-      max-height: 160px;
+      max-height: 170px;
       width: auto;
-      border-radius: 24px;
-      box-shadow: 0 12px 30px -8px black;
+      border-radius: 28px;
+      box-shadow: 0 16px 30px -8px black;
       object-fit: cover;
       border: 2px solid rgba(255,255,255,0.1);
-      transition: opacity 0.3s;
+      transition: opacity 0.2s;
     }
 
+    /* Popup moderne */
     .popup-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -194,10 +200,10 @@
     }
 
     .popup-card {
-      background: #1e2632;
+      background: #1f2937;
       padding: 2rem;
-      border-radius: 2.5rem;
-      width: 300px;
+      border-radius: 2.8rem;
+      width: 320px;
       max-width: 85vw;
       box-shadow: 0 40px 70px -10px black;
       border: 1px solid rgba(255,255,255,0.1);
@@ -213,10 +219,10 @@
     }
 
     .popup-card input[type="time"] {
-      background: #0f141c;
-      border: 1px solid #2f3b4a;
+      background: #111a24;
+      border: 1px solid #2e3b4b;
       color: white;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       padding: 0.8rem;
       border-radius: 60px;
       text-align: center;
@@ -231,7 +237,7 @@
       font-weight: 700;
       padding: 1rem;
       border-radius: 60px;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       cursor: pointer;
       transition: 0.1s ease;
     }
@@ -240,9 +246,10 @@
       transform: scale(0.97);
     }
 
+    /* Responsive */
     @media (max-width: 480px) {
       .glass-card { padding: 1.5rem; border-radius: 2rem; }
-      .time-remaining { font-size: 3.3rem; }
+      .time-remaining { font-size: 3.2rem; }
       .btn { min-width: 120px; padding: 0.8rem 0.3rem; font-size: 0.85rem; }
       .target-time { font-size: 1rem; }
     }
@@ -255,24 +262,25 @@
 
     <div class="button-grid">
       <div class="button-row">
-        <button class="btn btn-primary" onclick="showTimePicker()">⏰ CHOISIR L’HEURE</button>
+        <button class="btn btn-primary" onclick="showTimePicker()">⏰ HEURE</button>
         <button class="btn btn-success" onclick="startCountdown()">▶ START</button>
       </div>
       <div class="button-row">
         <button class="btn btn-outline" onclick="resetCountdown()">⟲ RESET</button>
-        <button class="btn btn-primary" onclick="loadAPI()">🌐 CHARGER API</button>
+        <button class="btn btn-primary" onclick="loadAPI()">🌐 API</button>
       </div>
       <div class="button-row">
-        <button class="btn btn-outline" onclick="switchMode()">🔄 SWITCH MANUEL/API</button>
+        <button class="btn btn-outline" onclick="switchMode()">🔄 SWITCH</button>
       </div>
     </div>
 
     <div class="api-info">
       <div class="api-title" id="apiTitle"></div>
-      <img class="api-image" id="apiImage" src="" alt="image événement" style="display: none;">
+      <img class="api-image" id="apiImage" src="" alt="" style="display: none;">
     </div>
   </div>
 
+  <!-- Popup pour saisir l'heure -->
   <div class="popup-overlay" id="timePickerPopup">
     <div class="popup-card">
       <input type="time" id="timeInput" value="18:00">
@@ -286,15 +294,17 @@
 
       // -------------------- ÉTAT GLOBAL --------------------
       let countdownInterval = null;
-      let targetDate = null;
-      let usingAPI = false;
-      let apiData = null;
+      let targetDate = null;           // Date cible actuelle
+      let usingAPI = false;             // Mode actif
+      let apiData = null;               // Stocke { name, image } du dernier appel API
 
+      // Clés localStorage
       const LS_MANUAL = 'targetDateManual';
       const LS_API = 'targetDateAPI';
       const LS_APIURL = 'apiUrl';
-      const LS_APIDATA = 'apiData';
+      const LS_APIDATA = 'apiData';     // pour sauvegarder name/image
 
+      // Éléments DOM
       const elTime = document.getElementById('timeRemaining');
       const elTarget = document.getElementById('targetTime');
       const elApiTitle = document.getElementById('apiTitle');
@@ -320,11 +330,7 @@
           elTime.textContent = '00:00:00';
           clearInterval(countdownInterval);
           countdownInterval = null;
-          if (usingAPI) {
-            localStorage.removeItem(LS_API);
-          } else {
-            localStorage.removeItem(LS_MANUAL);
-          }
+          // Ne pas supprimer targetDate, juste arrêter le compteur
           return;
         }
 
@@ -335,16 +341,22 @@
         elTime.textContent = `${formatTwoDigits(hours)}:${formatTwoDigits(minutes)}:${formatTwoDigits(seconds)}`;
       }
 
+      // Met à jour la ligne cible et les infos API (titre/image)
       function updateTargetDisplay() {
         if (!targetDate) {
           elTarget.textContent = 'CIBLE : --:--';
+          elApiTitle.textContent = '';
+          elApiImage.style.display = 'none';
+          elApiImage.src = '';
           return;
         }
 
+        // Format lisible : jour/mois/année heures:minutes
         const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
         const localStr = targetDate.toLocaleString('fr-FR', options).replace(':', 'h');
         elTarget.textContent = `CIBLE : ${localStr}`;
 
+        // Métadonnées API
         if (usingAPI && apiData) {
           elApiTitle.textContent = apiData.name || '';
           if (apiData.image) {
@@ -361,6 +373,7 @@
         }
       }
 
+      // Nettoie l'intervalle
       function clearSafeInterval() {
         if (countdownInterval) {
           clearInterval(countdownInterval);
@@ -368,15 +381,16 @@
         }
       }
 
+      // Lance le compte à rebours (si targetDate valide)
       function safeStartCountdown() {
         if (!targetDate) return false;
         clearSafeInterval();
-        updateDisplay();
+        updateDisplay(); // affichage immédiat
         countdownInterval = setInterval(updateDisplay, 1000);
         return true;
       }
 
-      // -------------------- ACTIONS PRINCIPALES --------------------
+      // -------------------- ACTIONS MANUELLES --------------------
       window.showTimePicker = function() {
         popup.classList.add('show');
         timeInput.focus();
@@ -395,6 +409,7 @@
         let candidate = new Date(now);
         candidate.setHours(hours, minutes, 0, 0);
 
+        // Si l'heure est déjà passée aujourd'hui, on prend demain
         if (candidate <= now) {
           candidate.setDate(candidate.getDate() + 1);
         }
@@ -403,6 +418,7 @@
         usingAPI = false;
         apiData = null;
 
+        // Sauvegarde
         localStorage.setItem(LS_MANUAL, targetDate.toString());
         localStorage.removeItem(LS_API);
         localStorage.removeItem(LS_APIDATA);
@@ -440,11 +456,14 @@
         hideTimePicker();
       };
 
+      // -------------------- SWITCH MANUEL / API --------------------
       window.switchMode = function() {
         const manualRaw = localStorage.getItem(LS_MANUAL);
         const apiRaw = localStorage.getItem(LS_API);
+        const apiDataRaw = localStorage.getItem(LS_APIDATA);
 
         if (usingAPI) {
+          // Actuellement API → basculer vers manuel si disponible
           if (manualRaw) {
             targetDate = new Date(manualRaw);
             usingAPI = false;
@@ -455,12 +474,12 @@
             return;
           }
         } else {
+          // Mode manuel → basculer vers API si disponible
           if (apiRaw) {
             targetDate = new Date(apiRaw);
             usingAPI = true;
-            const storedApi = localStorage.getItem(LS_APIDATA);
-            if (storedApi) {
-              try { apiData = JSON.parse(storedApi); } catch { apiData = null; }
+            if (apiDataRaw) {
+              try { apiData = JSON.parse(apiDataRaw); } catch { apiData = null; }
             } else {
               apiData = null;
             }
@@ -474,16 +493,16 @@
         safeStartCountdown();
       };
 
-      // -------------------- CHARGEMENT API (modifié : pas de valeur par défaut) --------------------
+      // -------------------- CHARGEMENT API (ULTRA COMPATIBLE) --------------------
       window.loadAPI = async function() {
-        // Plus de suggestion "evenements.json" : on propose un placeholder explicite
-        const url = prompt('Entrez l’URL de l’API (ex: https://exemple.com/data.json) :', '');
+        const url = prompt('Entrez l’URL de l’API (JSON contenant une date) :', '');
         if (!url) return;
 
         try {
           let response;
           let useProxy = false;
 
+          // Tentative de fetch direct
           try {
             response = await fetch(url);
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -493,6 +512,7 @@
 
           let data;
           if (useProxy) {
+            // Fallback CORS via allorigins
             const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
             const proxyRes = await fetch(proxyUrl);
             const proxyJson = await proxyRes.json();
@@ -501,26 +521,58 @@
             data = await response.json();
           }
 
-          const dateStr = data.date_utc || data.date || data.datetime;
-          if (!dateStr) {
-            alert('Aucun champ date (date_utc, date, datetime) trouvé dans le JSON.');
-            console.error('JSON reçu:', data);
+          // Fonction récursive pour extraire toutes les dates potentielles (chaînes convertibles)
+          let foundDates = [];
+
+          function extractDates(obj) {
+            if (!obj || typeof obj !== 'object') return;
+            for (let key in obj) {
+              let val = obj[key];
+              // Si la valeur est une chaîne, on tente de la convertir en Date
+              if (typeof val === 'string') {
+                let d = new Date(val);
+                if (!isNaN(d)) foundDates.push(d);
+              }
+              // Si la clé elle-même ressemble à une date (peu probable mais au cas où)
+              if (typeof key === 'string') {
+                let dk = new Date(key);
+                if (!isNaN(dk)) foundDates.push(dk);
+              }
+              // Récursion dans les objets ou tableaux
+              if (val && typeof val === 'object') {
+                extractDates(val);
+              }
+            }
+          }
+
+          extractDates(data);
+
+          if (foundDates.length === 0) {
+            alert('Aucune date valide trouvée dans la réponse.');
             return;
           }
 
-          const parsedDate = new Date(dateStr);
-          if (isNaN(parsedDate)) {
-            alert('La date extraite est invalide.');
+          // Filtrer les dates futures
+          const now = new Date();
+          let futureDates = foundDates.filter(d => d > now);
+          if (futureDates.length === 0) {
+            alert('Toutes les dates trouvées sont déjà passées.');
             return;
           }
 
-          targetDate = parsedDate;
+          // Prendre la date future la plus proche
+          futureDates.sort((a, b) => a - b);
+          targetDate = futureDates[0];
+
           usingAPI = true;
+
+          // Extraire les métadonnées (name, image) si présentes
           apiData = {
             name: data.name || null,
             image: data.image || null
           };
 
+          // Sauvegarde
           localStorage.setItem(LS_API, targetDate.toString());
           localStorage.setItem(LS_APIURL, url);
           localStorage.setItem(LS_APIDATA, JSON.stringify(apiData));
@@ -534,7 +586,7 @@
         }
       };
 
-      // -------------------- INITIALISATION --------------------
+      // -------------------- INITIALISATION AU CHARGEMENT --------------------
       window.addEventListener('load', function() {
         const manual = localStorage.getItem(LS_MANUAL);
         const api = localStorage.getItem(LS_API);
@@ -566,11 +618,13 @@
           elTarget.textContent = 'CIBLE : --:--';
         }
 
+        // Fermer le popup en cliquant sur l'overlay
         popup.addEventListener('click', function(e) {
           if (e.target === popup) hideTimePicker();
         });
       });
+
     })();
   </script>
-</body> 
+</body>
 </html>
