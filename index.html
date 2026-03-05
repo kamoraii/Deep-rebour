@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/jpeg" href="icone_site.jpeg">
+  <link rel="apple-touch-icon" sizes="180x180" href="icone_site.jpeg">
+  
+  <title>Compte à rebours • interactif</title>
+  <style>
+    /* (le style reste exactement le même que précédemment, 
+       je le réintègre pour que le fichier soit complet) */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b0d10;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      color: #eef2f5;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -50% -50% -50% -50%;
+      background-image: 
+        linear-gradient(90deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(120, 180, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: drift 18s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-60px, -60px); }
+    }
+
+    .glass-card {
+      position: relative;
+      z-index: 10;
+      width: 92%;
+      max-width: 500px;
+      background: rgba(18, 22, 28, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(220, 240, 255, 0.08);
+      border-radius: 2.5rem;
+      padding: 2rem 1.8rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(90, 160, 255, 0.1) inset;
+      transition: transform 0.2s ease;
+    }
+
+    .time-remaining {
+      font-size: 4.2rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(60, 160, 255, 0.4);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .target-time {
+      font-size: 1.2rem;
+      text-align: center;
+      color: #9ab3cf;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      display: inline-block;
+      margin: 0 auto 1.2rem;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .button-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      flex: 1 1 auto;
+      min-width: 140px;
+      padding: 0.9rem 0.8rem;
+      border: none;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      background: rgba(30, 40, 55, 0.8);
+      color: #e0edff;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:hover {
+      background: rgba(45, 60, 80, 0.9);
+      border-color: rgba(100, 180, 255, 0.3);
+      transform: scale(0.98);
+      box-shadow: 0 8px 18px rgba(0, 120, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: rgba(30, 110, 220, 0.85);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .btn-primary:hover {
+      background: rgb(40, 130, 255);
+    }
+
+    .btn-success {
+      background: rgba(20, 130, 80, 0.85);
+    }
+    .btn-success:hover {
+      background: rgb(30, 160, 100);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .api-info {
+      margin: 1.5rem 0 0.2rem;
+      text-align: center;
+      border-top: 1px dashed rgba(255,255,255,0.1);
+      padding-top: 1.2rem;
+    }
+
+    .api-title {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #cfddee;
+      margin-bottom: 0.75rem;
+    }
+
+    .api-image {
+      max-width: 100%;
+      max-height: 160px;
+      width: auto;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px -8px black;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.1);
+      transition: opacity 0.3s;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0s 0.25s;
+    }
+
+    .popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.25s ease, visibility 0s 0s;
+    }
+
+    .popup-card {
+      background: #1e2632;
+      padding: 2rem;
+      border-radius: 2.5rem;
+      width: 300px;
+      max-width: 85vw;
+      box-shadow: 0 40px 70px -10px black;
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      transform: scale(0.9);
+      transition: transform 0.25s ease;
+    }
+
+    .popup-overlay.show .popup-card {
+      transform: scale(1);
+    }
+
+    .popup-card input[type="time"] {
+      background: #0f141c;
+      border: 1px solid #2f3b4a;
+      color: white;
+      font-size: 1.6rem;
+      padding: 0.8rem;
+      border-radius: 60px;
+      text-align: center;
+      font-weight: 500;
+      outline: none;
+    }
+
+    .popup-card button {
+      background: #2a80ff;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 1rem;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.1s ease;
+    }
+    .popup-card button:hover {
+      background: #4090ff;
+      transform: scale(0.97);
+    }
+
+    @media (max-width: 480px) {
+      .glass-card { padding: 1.5rem; border-radius: 2rem; }
+      .time-remaining { font-size: 3.3rem; }
+      .btn { min-width: 120px; padding: 0.8rem 0.3rem; font-size: 0.85rem; }
+      .target-time { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glass-card">
+    <div class="time-remaining" id="timeRemaining">00:00:00</div>
+    <div class="target-time" id="targetTime">CIBLE : --:--</div>
+
+    <div class="button-grid">
+      <div class="button-row">
+        <button class="btn btn-primary" onclick="showTimePicker()">⏰ CHOISIR L’HEURE</button>
+        <button class="btn btn-success" onclick="startCountdown()">▶ START</button>
+      </div>
+      <div class="button-row">
+        <button class="btn btn-outline" onclick="resetCountdown()">⟲ RESET</button>
+        <button class="btn btn-primary" onclick="loadAPI()">🌐 CHARGER API</button>
+      </div>
+      <div class="button-row">
+        <button class="btn btn-outline" onclick="switchMode()">🔄 SWITCH MANUEL/API</button>
+      </div>
+    </div>
+
+    <div class="api-info">
+      <div class="api-title" id="apiTitle"></div>
+      <img class="api-image" id="apiImage" src="" alt="image événement" style="display: none;">
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="timePickerPopup">
+    <div class="popup-card">
+      <input type="time" id="timeInput" value="18:00">
+      <button onclick="confirmTime()">Valider l’heure</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      // -------------------- ÉTAT GLOBAL --------------------
+      let countdownInterval = null;
+      let targetDate = null;
+      let usingAPI = false;
+      let apiData = null;
+
+      const LS_MANUAL = 'targetDateManual';
+      const LS_API = 'targetDateAPI';
+      const LS_APIURL = 'apiUrl';
+      const LS_APIDATA = 'apiData';
+
+      const elTime = document.getElementById('timeRemaining');
+      const elTarget = document.getElementById('targetTime');
+      const elApiTitle = document.getElementById('apiTitle');
+      const elApiImage = document.getElementById('apiImage');
+      const popup = document.getElementById('timePickerPopup');
+      const timeInput = document.getElementById('timeInput');
+
+      // -------------------- FONCTIONS D'AFFICHAGE --------------------
+      function formatTwoDigits(n) {
+        return n.toString().padStart(2, '0');
+      }
+
+      function updateDisplay() {
+        if (!targetDate) {
+          elTime.textContent = '00:00:00';
+          return;
+        }
+
+        const now = new Date();
+        let diff = targetDate - now;
+
+        if (diff <= 0) {
+          elTime.textContent = '00:00:00';
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          if (usingAPI) {
+            localStorage.removeItem(LS_API);
+          } else {
+            localStorage.removeItem(LS_MANUAL);
+          }
+          return;
+        }
+
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        elTime.textContent = `${formatTwoDigits(hours)}:${formatTwoDigits(minutes)}:${formatTwoDigits(seconds)}`;
+      }
+
+      function updateTargetDisplay() {
+        if (!targetDate) {
+          elTarget.textContent = 'CIBLE : --:--';
+          return;
+        }
+
+        const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
+        const localStr = targetDate.toLocaleString('fr-FR', options).replace(':', 'h');
+        elTarget.textContent = `CIBLE : ${localStr}`;
+
+        if (usingAPI && apiData) {
+          elApiTitle.textContent = apiData.name || '';
+          if (apiData.image) {
+            elApiImage.src = apiData.image;
+            elApiImage.style.display = 'inline-block';
+          } else {
+            elApiImage.style.display = 'none';
+            elApiImage.src = '';
+          }
+        } else {
+          elApiTitle.textContent = '';
+          elApiImage.style.display = 'none';
+          elApiImage.src = '';
+        }
+      }
+
+      function clearSafeInterval() {
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+      }
+
+      function safeStartCountdown() {
+        if (!targetDate) return false;
+        clearSafeInterval();
+        updateDisplay();
+        countdownInterval = setInterval(updateDisplay, 1000);
+        return true;
+      }
+
+      // -------------------- ACTIONS PRINCIPALES --------------------
+      window.showTimePicker = function() {
+        popup.classList.add('show');
+        timeInput.focus();
+      };
+
+      window.hideTimePicker = function() {
+        popup.classList.remove('show');
+      };
+
+      window.confirmTime = function() {
+        const timeVal = timeInput.value;
+        if (!timeVal) return;
+
+        const [hours, minutes] = timeVal.split(':').map(Number);
+        const now = new Date();
+        let candidate = new Date(now);
+        candidate.setHours(hours, minutes, 0, 0);
+
+        if (candidate <= now) {
+          candidate.setDate(candidate.getDate() + 1);
+        }
+
+        targetDate = candidate;
+        usingAPI = false;
+        apiData = null;
+
+        localStorage.setItem(LS_MANUAL, targetDate.toString());
+        localStorage.removeItem(LS_API);
+        localStorage.removeItem(LS_APIDATA);
+
+        updateTargetDisplay();
+        safeStartCountdown();
+        hideTimePicker();
+      };
+
+      window.startCountdown = function() {
+        if (!targetDate) {
+          alert('Veuillez d’abord choisir une heure ou charger une API.');
+          return;
+        }
+        safeStartCountdown();
+      };
+
+      window.resetCountdown = function() {
+        clearSafeInterval();
+        targetDate = null;
+        usingAPI = false;
+        apiData = null;
+
+        elTime.textContent = '00:00:00';
+        elTarget.textContent = 'CIBLE : --:--';
+        elApiTitle.textContent = '';
+        elApiImage.style.display = 'none';
+        elApiImage.src = '';
+
+        localStorage.removeItem(LS_MANUAL);
+        localStorage.removeItem(LS_API);
+        localStorage.removeItem(LS_APIURL);
+        localStorage.removeItem(LS_APIDATA);
+
+        hideTimePicker();
+      };
+
+      window.switchMode = function() {
+        const manualRaw = localStorage.getItem(LS_MANUAL);
+        const apiRaw = localStorage.getItem(LS_API);
+
+        if (usingAPI) {
+          if (manualRaw) {
+            targetDate = new Date(manualRaw);
+            usingAPI = false;
+            apiData = null;
+            localStorage.removeItem(LS_APIDATA);
+          } else {
+            alert('Aucune date manuelle enregistrée. Choisissez une heure d’abord.');
+            return;
+          }
+        } else {
+          if (apiRaw) {
+            targetDate = new Date(apiRaw);
+            usingAPI = true;
+            const storedApi = localStorage.getItem(LS_APIDATA);
+            if (storedApi) {
+              try { apiData = JSON.parse(storedApi); } catch { apiData = null; }
+            } else {
+              apiData = null;
+            }
+          } else {
+            alert('Aucune date API enregistrée. Chargez une API d’abord.');
+            return;
+          }
+        }
+
+        updateTargetDisplay();
+        safeStartCountdown();
+      };
+
+      // -------------------- CHARGEMENT API (modifié : pas de valeur par défaut) --------------------
+      window.loadAPI = async function() {
+        // Plus de suggestion "evenements.json" : on propose un placeholder explicite
+        const url = prompt('Entrez l’URL de l’API (ex: https://exemple.com/data.json) :', '');
+        if (!url) return;
+
+        try {
+          let response;
+          let useProxy = false;
+
+          try {
+            response = await fetch(url);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+          } catch (e) {
+            useProxy = true;
+          }
+
+          let data;
+          if (useProxy) {
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+            const proxyRes = await fetch(proxyUrl);
+            const proxyJson = await proxyRes.json();
+            data = JSON.parse(proxyJson.contents);
+          } else {
+            data = await response.json();
+          }
+
+          const dateStr = data.date_utc || data.date || data.datetime;
+          if (!dateStr) {
+            alert('Aucun champ date (date_utc, date, datetime) trouvé dans le JSON.');
+            console.error('JSON reçu:', data);
+            return;
+          }
+
+          const parsedDate = new Date(dateStr);
+          if (isNaN(parsedDate)) {
+            alert('La date extraite est invalide.');
+            return;
+          }
+
+          targetDate = parsedDate;
+          usingAPI = true;
+          apiData = {
+            name: data.name || null,
+            image: data.image || null
+          };
+
+          localStorage.setItem(LS_API, targetDate.toString());
+          localStorage.setItem(LS_APIURL, url);
+          localStorage.setItem(LS_APIDATA, JSON.stringify(apiData));
+
+          updateTargetDisplay();
+          safeStartCountdown();
+
+        } catch (err) {
+          alert('Erreur lors du chargement de l’API. Voir console.');
+          console.error(err);
+        }
+      };
+
+      // -------------------- INITIALISATION --------------------
+      window.addEventListener('load', function() {
+        const manual = localStorage.getItem(LS_MANUAL);
+        const api = localStorage.getItem(LS_API);
+        const apiDataRaw = localStorage.getItem(LS_APIDATA);
+
+        if (manual) {
+          const d = new Date(manual);
+          if (!isNaN(d)) {
+            targetDate = d;
+            usingAPI = false;
+            apiData = null;
+          }
+        } else if (api) {
+          const d = new Date(api);
+          if (!isNaN(d)) {
+            targetDate = d;
+            usingAPI = true;
+            if (apiDataRaw) {
+              try { apiData = JSON.parse(apiDataRaw); } catch { apiData = null; }
+            }
+          }
+        }
+
+        if (targetDate) {
+          updateTargetDisplay();
+          safeStartCountdown();
+        } else {
+          elTime.textContent = '00:00:00';
+          elTarget.textContent = 'CIBLE : --:--';
+        }
+
+        popup.addEventListener('click', function(e) {
+          if (e.target === popup) hideTimePicker();
+        });
+      });
+    })();
+  </script>
+</body> 
+</html>
